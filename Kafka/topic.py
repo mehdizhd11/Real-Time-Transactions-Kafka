@@ -15,7 +15,6 @@ class Topic:
 
     def create_topic(self, name, partitions, replication_factor):
         try:
-            self.start_admin_client()
             self.admin_client.create_topics(
                 new_topics=[NewTopic(name=name, num_partitions=partitions, replication_factor=replication_factor)],
                 validate_only=False)
