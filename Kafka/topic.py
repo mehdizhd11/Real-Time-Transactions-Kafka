@@ -55,14 +55,14 @@ class TopicManager:
 if __name__ == "__main__":
     topic_manager = TopicManager()
 
-    # Create a topic
-    create_result = topic_manager.create_topic(name="transactions", partitions=3, replication_factor=1)
-    if create_result:
-        logger.info("TopicManager creation was successful.")
-    else:
-        logger.info("TopicManager creation failed.")
+    # Create a topic_manager
+    # create_result = topic_manager.create_topic(name="transactions", partitions=3, replication_factor=3)
+    # if create_result:
+    #     logger.info("TopicManager creation was successful.")
+    # else:
+    #     logger.info("TopicManager creation failed.")
 
-    # Delete a topic
+    # Delete a topic_manager
     # delete_result = topic_manager.delete_topic(name="example_topic")
     # if delete_result:
     #     logger.info("TopicManager deletion was successful.")
@@ -72,4 +72,6 @@ if __name__ == "__main__":
     # for t in topic_manager.list_topics():
     #     topic_manager.delete_topic(name=t)
 
+    topic_manager.delete_topic('transaction-data')
+    topic_manager.delete_topic(name='transactions')
     print(topic_manager.list_topics())

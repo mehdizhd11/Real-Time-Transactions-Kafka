@@ -1,29 +1,29 @@
 import json
+import time
+
 from confluent_kafka import Consumer as ConfluentConsumer, KafkaError, KafkaException
 
 
 class ConsumerManager:
 
-    def __init__(self, bootstrap_servers = 'localhost:9092', group_id = 'transactions_consumers',
-                 kafka_topic = 'transactions',
-                 client = None):
-        self.kafka_topic = kafka_topic
-        self.mongo_client = client
+    def __init__(self, bootstrap_servers = 'localhost:9092', group_id = 'transactions_consumers', client = None):
+        self.client = client
         self.consumer = ConfluentConsumer({
             'bootstrap.servers': bootstrap_servers,
             'group.id': group_id,
             'auto.offset.reset': 'earliest',  # or 'latest' based on requirement
             'enable.auto.commit': True
         })
-        self.consumer.subscribe([self.kafka_topic])
 
 
     def set_client(self, client):
-        self.mongo_client = client
+        self.client = client
 
 
-    def poll_messages(self, timeout = 8.0):
-        while True:
+    def poll_messages(self, timeout = 8.0, duration = 20, kafka_topic = 'transactions'):
+        self.consumer.subscribe([kafka_topic])
+        start_time = time.time()
+        while time.time() - start_time < duration:
             try:
                 msg = self.consumer.poll(timeout)
                 if msg is None:
@@ -35,7 +35,8 @@ class ConsumerManager:
                     else:
                         raise KafkaException(msg.error())
                 record = json.loads(msg.value().decode('utf-8'))
-                self.mongo_client.insert_data([record])
+                print(f'New data received : {[record]}')
+                # self.client.insert_data([record])
             except Exception as e:
                 print(f"Error consuming message: {e}")
 

@@ -3,8 +3,8 @@ from Kafka.producer import ProducerManager
 from Kafka.consumer import ConsumerManager
 
 
-topic = TopicManager()
+topic_manager = TopicManager()
 
-producer = ProducerManager()
+producer_manager = ProducerManager()
 
-consumer = ConsumerManager()
+consumer_manager = ConsumerManager()
