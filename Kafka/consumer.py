@@ -12,7 +12,9 @@ class ConsumerManager:
             'bootstrap.servers': bootstrap_servers,
             'group.id': group_id,
             'auto.offset.reset': 'earliest',  # or 'latest' based on requirement
-            'enable.auto.commit': True
+            'enable.auto.commit': True,
+            'fetch.max.bytes': 30000000,  # 10 MB
+            'max.partition.fetch.bytes': 30000000,  # 10 MB
         })
 
 
@@ -20,7 +22,7 @@ class ConsumerManager:
         self.client = client
 
 
-    def poll_messages(self, timeout = 8.0, duration = 20, kafka_topic = 'transactions'):
+    def poll_messages(self, timeout = 1.0, duration = 20, kafka_topic = 'transactions'):
         self.consumer.subscribe([kafka_topic])
         start_time = time.time()
         while time.time() - start_time < duration:
@@ -35,8 +37,8 @@ class ConsumerManager:
                     else:
                         raise KafkaException(msg.error())
                 record = json.loads(msg.value().decode('utf-8'))
-                print(f'New data received : {[record]}')
-                # self.client.insert_data([record])
+                # print(f'New data received : {[record]}')
+                self.client.insert_data(record)
             except Exception as e:
                 print(f"Error consuming message: {e}")
 

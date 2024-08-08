@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class TransactionDataGenerator:
 
-    def __init__(self, file_paths: List[str], chunk_size: int = 1000, sleep_time: int = 10,
+    def __init__(self, file_paths: List[str], chunk_size: int = 100000, sleep_time: int = 3,
                  kafka_producer: Optional[object] = None):
         self.file_paths = file_paths
         self.chunk_size = chunk_size

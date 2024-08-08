@@ -38,6 +38,10 @@ class MongoDBClient:
             logging.error(f"Error saving messages to MongoDB: {e}")
 
 
+    def len_collection(self):
+        return self.collection.count_documents({})
+
+
     def close_connection(self):
         self.client.close()
         logging.info("Closed MongoDB connection")

@@ -6,15 +6,18 @@ class ProducerManager:
 
     def __init__(self, bootstrap_servers = 'localhost:9092'):
         self.bootstrap_servers = bootstrap_servers
-        self.producer = ConfluentProducer({'bootstrap.servers': self.bootstrap_servers})
+        self.producer = ConfluentProducer({
+            'bootstrap.servers': self.bootstrap_servers,
+            'message.max.bytes': 30000000,  # 30 MB
+            'batch.size': 30000000,  # 30 MB
+        })
 
-
-    # def delivery_report(self, err):
-    #     """Delivery report callback called (from flush()) on successful or failed delivery of message"""
-    #     if err is not None:
-    #         print(f"Message delivery failed: {err}")
-    #     else:
-    #         print(f"Message delivered")
+        # def delivery_report(self, err):
+        #     """Delivery report callback called (from flush()) on successful or failed delivery of message"""
+        #     if err is not None:
+        #         print(f"Message delivery failed: {err}")
+        #     else:
+        #         print(f"Message delivered")
 
 
     def send_to_kafka(self, data, kafka_topic = 'transactions'):
