@@ -1,37 +1,61 @@
-from kafka import KafkaConsumer
 import json
+from confluent_kafka import Consumer as ConfluentConsumer, KafkaError, KafkaException
 
 
-class Consumer:
+class ConsumerManager:
 
-    def __init__(self, bootstrap_servers = 'localhost:9092', group_id = 'my_group', kafka_topic = 'transactions',
+    def __init__(self, bootstrap_servers = 'localhost:9092', group_id = 'transactions_consumers',
+                 kafka_topic = 'transactions',
                  client = None):
         self.kafka_topic = kafka_topic
-        self.consumer = KafkaConsumer(
-            kafka_topic,
-            bootstrap_servers=bootstrap_servers,
-            group_id=group_id,
-            auto_offset_reset='earliest',  # or 'latest' based on requirement
-            enable_auto_commit=True,
-            value_deserializer=lambda x: json.loads(x.decode('utf-8'))
-        )
-        self.client = client
+        self.mongo_client = client
+        self.consumer = ConfluentConsumer({
+            'bootstrap.servers': bootstrap_servers,
+            'group.id': group_id,
+            'auto.offset.reset': 'earliest',  # or 'latest' based on requirement
+            'enable.auto.commit': True
+        })
+        self.consumer.subscribe([self.kafka_topic])
 
 
     def set_client(self, client):
-        self.client = client
+        self.mongo_client = client
 
 
-    def poll_messages(self, timeout = 1.0):
+    def poll_messages(self, timeout = 8.0):
         while True:
-            messages = self.consumer.poll(timeout_ms=timeout * 2000)
-            records = []
-            if messages:
-                for topic_partition, msgs in messages.items():
-                    records.extend(msg.value for msg in msgs)
-            if records:
-                self.client.insert_data(records)
+            try:
+                msg = self.consumer.poll(timeout)
+                if msg is None:
+                    print('No data received')
+                    continue
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        continue
+                    else:
+                        raise KafkaException(msg.error())
+                record = json.loads(msg.value().decode('utf-8'))
+                self.mongo_client.insert_data([record])
+            except Exception as e:
+                print(f"Error consuming message: {e}")
 
 
     def close_consumer(self):
         self.consumer.close()
+
+
+# Example usage
+if __name__ == "__main__":
+    class MockClient:
+
+        def insert_data(self, data):
+            print("Data inserted:", data)
+
+
+    consumer = ConsumerManager(client=MockClient())
+    try:
+        consumer.poll_messages()
+    except KeyboardInterrupt:
+        print("ConsumerManager interrupted")
+    finally:
+        consumer.close_consumer()
