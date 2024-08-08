@@ -1,9 +1,9 @@
-from Kafka.topic import Topic
+from Kafka.topic import TopicManager
 from Kafka.producer import Producer
 from Kafka.consumer import Consumer
 
 
-topic = Topic()
+topic = TopicManager()
 
 producer = Producer()
 
