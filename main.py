@@ -21,10 +21,10 @@ consumer_manager.close_consumer()
 
 print(f'Kafka process finished. Num aggregated data : {mongo_client.len_collection()}')
 
-# test 1 : Kafka process finished. Num aggregated data : 66000
+# Test 1 : Kafka process finished. Num aggregated data : 66000 ( in 30 seconds )
 
-# change the Kafka config to handle more data
+# Change the Kafka config to handle more data
 
-# test 2 : Kafka process finished. Num aggregated data : 600000
+# Test 2 : Kafka process finished. Num aggregated data : 600000 ( in 30 seconds )
 
-# test 3 : Kafka process finished. Num aggregated data : 1,400,000 ( in 30 seconds )
+# Test 3 : Kafka process finished. Num aggregated data : 1,400,000 ( in 30 seconds )
