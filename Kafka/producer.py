@@ -1,22 +1,35 @@
 import json
-from kafka import KafkaProducer
+from confluent_kafka import Producer as ConfluentProducer
 
 
-class Producer:
+class ProducerManager:
 
-    def __init__(self, bootstrap_servers = 'localhost:9092', kafka_topic = 'transactions'):
+    def __init__(self, bootstrap_servers = 'localhost:9092'):
         self.bootstrap_servers = bootstrap_servers
-        self.kafka_topic = kafka_topic
-        self.producer = KafkaProducer(
-            bootstrap_servers=self.bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
-        )
+        self.producer = ConfluentProducer({'bootstrap.servers': self.bootstrap_servers})
 
 
-    def send_to_kafka(self, data):
-        self.producer.send(self.kafka_topic, value=data)
+    def delivery_report(self, err, msg):
+        """Delivery report callback called (from flush()) on successful or failed delivery of message"""
+        if err is not None:
+            print(f"Message delivery failed: {err}")
+        else:
+            print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+
+    def send_to_kafka(self, data, kafka_topic = 'transactions'):
+        self.producer.produce(kafka_topic, value=json.dumps(data).encode('utf-8'), callback=self.delivery_report)
         self.producer.flush()
 
 
     def close_producer(self):
-        self.producer.close()
+        self.producer.flush()
+        self.producer = None
+
+
+# Example usage
+if __name__ == "__main__":
+    producer = ProducerManager()
+    data = {"key": "value"}
+    producer.send_to_kafka(data)
+    producer.close_producer()
